@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class SwaggerConfig {
+public class SwaggerConfiguration {
   @Bean
   public OpenAPI openAPI() {
     return new OpenAPI()
@@ -17,7 +17,7 @@ public class SwaggerConfig {
 
   private Info apiInfo() {
     return new Info()
-      .title("코놀자 API") // API의 제목
+      .title("코놀자 API") // API 의 제목
       .version("1.0.0"); // API 의 버전
   }
 }
