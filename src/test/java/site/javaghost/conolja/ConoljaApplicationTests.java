@@ -9,5 +9,4 @@ class ConoljaApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
 }
