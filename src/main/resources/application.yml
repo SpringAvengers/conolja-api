@@ -17,3 +17,14 @@ springdoc:
   servers:
     - "http://localhost:8080${server.servlet.context-path}"
     - "https://api.conolja.site${server.servlet.context-path}"
+
+jwt:
+  secret: IDyR2qkVrZUbbkEobzqRU5CGMT8egOTBMgNejesrLKdUGflqxraX/QM3gKj+tly6JGSRkcmH8CPR+j/VfsZB2w==
+  expiration: 1800000 # 30분
+  header: Authorization
+  prefix: Bearer
+  issuer: conolja.site
+  refresh:
+    expiration: 86400000 # 24시간
+    header: Refresh
+    prefix: Bearer
