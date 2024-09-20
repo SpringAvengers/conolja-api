@@ -28,6 +28,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         String headerValue = request.getHeader(ACCESS_TOKEN_HEADER);
         Claims claims = jwtTokenProvider.extractClaims(headerValue);
+
+        // JWT 토큰이 유효하지 않거나 사용자를 찾을 수 없는 경우 처리
+        if (claims == null) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
+            return;
+        }
+
         String username = claims.getSubject();
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
