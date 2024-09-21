@@ -1,0 +1,13 @@
+spring:
+  application:
+    profiles:
+      active: dev  # 어플리케이션의 프로파일 설정
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/conolja
+    username: conolja
+    password: conolja
+
+springdoc:
+  servers:
+    - "https://api.conolja.site${server.servlet.context-path}"

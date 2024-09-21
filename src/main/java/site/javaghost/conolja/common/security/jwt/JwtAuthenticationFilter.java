@@ -1,58 +1,55 @@
 package site.javaghost.conolja.common.security.jwt;
 
-import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
 
-import static site.javaghost.conolja.common.security.jwt.JwtConfiguration.ACCESS_TOKEN_HEADER;
+@Slf4j
+public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
-@RequiredArgsConstructor
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    private final JwtTokenProvider jwtTokenProvider;
-    private final UserDetailsService userDetailsService;
+  private final JwtTokenUtil jwtTokenUtil;
+  private final JwtProperties jwtProperties;
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
-        String headerValue = request.getHeader(ACCESS_TOKEN_HEADER);
-        // JWT 토큰이 없는 경우 필터 체인 계속 진행
-        if (headerValue == null || !headerValue.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+  public JwtAuthenticationFilter(JwtTokenUtil jwtTokenUtil, JwtProperties jwtProperties) {
+    this.jwtTokenUtil = jwtTokenUtil;
+    this.jwtProperties = jwtProperties;
+  }
 
-        Claims claims = jwtTokenProvider.extractClaims(headerValue);
+  @Override
+  protected String obtainPassword(HttpServletRequest request) {
+    Authentication auth = getAuthentication(request.getHeader(jwtProperties.header()));
+    return (String) auth.getCredentials();
+  }
 
-        // JWT 토큰이 유효하지 않거나 사용자를 찾을 수 없는 경우 처리
-        if (claims == null) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
-            return;
-        }
+  @Override
+  protected String obtainUsername(HttpServletRequest request) {
+    Authentication auth = getAuthentication(request.getHeader(jwtProperties.header()));
+    return auth.getName();
+  }
 
-        String username = claims.getSubject();
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+  private Authentication getAuthentication(String headerValue) {
+    String accessToken = jwtTokenUtil.parseToken(headerValue);
+    return jwtTokenUtil.getAuthentication(accessToken);
+  }
 
-        // 권환부여
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities());
+  @Override
+  protected void successfulAuthentication(
+    HttpServletRequest request,
+    HttpServletResponse response,
+    FilterChain chain,
+    Authentication authResult) throws IOException, ServletException {
 
-        // Detail 을 넣어줍니다
-        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-    }
+    // 토큰 생성
+    JwtTokenDto jwtTokenDto = jwtTokenUtil.generateToken(authResult);
+    // 토큰을 응답 헤더에 추가
+    response.addHeader(jwtProperties.header(), jwtProperties.prefix() + " " + jwtTokenDto.accessToken());
+    chain.doFilter(request, response);
+  }
 }

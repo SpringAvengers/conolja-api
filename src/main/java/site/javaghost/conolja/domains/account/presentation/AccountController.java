@@ -23,11 +23,5 @@ public class AccountController {
 
 	private final AccountService accountService;
 
-	@PostMapping("/signup")
-	@Operation(summary = "회원가입", description = "회원가입을 합니다.")
-	public ResponseEntity<Map<String, String>> signup(
-		@Valid @RequestBody AccountCreateRequest request) {
-		accountService.signup(request.toCommand());
-		return ResponseEntity.ok(Map.of("message", "회원가입 성공"));
-	}
+
 }

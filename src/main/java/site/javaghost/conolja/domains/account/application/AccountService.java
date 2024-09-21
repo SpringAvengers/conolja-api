@@ -10,10 +10,5 @@ import site.javaghost.conolja.domains.account.infra.AccountJpaRepository;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class AccountService {
-	private final AccountJpaRepository accountJpaRepository;
 
-	@Transactional
-	public void signup(AccountCreateCommand command) {
-		accountJpaRepository.save(command.toEntity());
-	}
 }

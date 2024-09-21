@@ -16,7 +16,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 
 
 @Entity
-@Table(name = "accounts")
+@Table(name = "accounts", schema = "conolja")
 @Getter
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 public class Account {
@@ -44,5 +44,9 @@ public class Account {
                 .name(name)
                 .role(role)
                 .build();
+    }
+
+    public void encodePassword(String encodedPassword) {
+        this.password = encodedPassword;
     }
 }
