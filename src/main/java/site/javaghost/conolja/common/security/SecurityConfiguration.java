@@ -1,19 +1,20 @@
 package site.javaghost.conolja.common.security;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import site.javaghost.conolja.common.security.jwt.JwtAuthenticationFilter;
 import site.javaghost.conolja.common.security.jwt.JwtAuthenticationProvider;
@@ -22,54 +23,53 @@ import site.javaghost.conolja.common.security.jwt.JwtTokenUtil;
 import site.javaghost.conolja.common.security.jwt.JwtValidationFilter;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebSecurity(debug = true)
 @RequiredArgsConstructor
 public class SecurityConfiguration {
   private final JwtValidationFilter jwtValidationFilter;
-  private final JwtTokenUtil jwtTokenUtil;
   private final UserDetailsService userDetailsService;
   private final JwtProperties jwtProperties;
+  private final JwtTokenUtil jwtTokenUtil;
 
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
+      .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .csrf(AbstractHttpConfigurer::disable)
       .httpBasic(AbstractHttpConfigurer::disable)
       .formLogin(AbstractHttpConfigurer::disable)
       .authorizeHttpRequests(auth -> auth
-        .requestMatchers("/apis", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
-          .anyRequest().authenticated()
+              .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() // resources 접근 허용 설정
+              .requestMatchers("/api/auth/*").permitAll()
+              .requestMatchers("/api/apis", "/api/swagger-ui/*", "/api/swagger-ui.html", "/api/v3/api-docs/*").permitAll()
+              .anyRequest().authenticated()
       )
-      .addFilterBefore(jwtValidationFilter, UsernamePasswordAuthenticationFilter.class);
+            // JWT 검증 필터는 UsernamePasswordAuthenticationFilter 이전에 실행
+            .addFilterBefore(jwtValidationFilter, UsernamePasswordAuthenticationFilter.class)
+            // JWT 인증 필터는 UsernamePasswordAuthenticationFilter 와 동일한 위치에서 실행
+            .addFilterAt(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+            .authenticationProvider(jwtAuthenticationProvider(passwordEncoder(), userDetailsService));
     return http.build();
   }
 
-  @Bean
-  public AuthenticationManager authenticationManager(
-    HttpSecurity http,
-    AuthenticationProvider authenticationProvider) throws Exception {
-    AuthenticationManagerBuilder authenticationManagerBuilder =
-      http.getSharedObject(AuthenticationManagerBuilder.class);
-    authenticationManagerBuilder.authenticationProvider(authenticationProvider);
-    return authenticationManagerBuilder.build();
+  @Bean JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
+    JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtTokenUtil, jwtProperties);
+    filter.setAuthenticationManager(authenticationManager());
+    return filter;
   }
 
-    @Bean
-    public AuthenticationProvider authenticationProvider(PasswordEncoder passwordEncoder) {
-      return new JwtAuthenticationProvider(passwordEncoder, userDetailsService);
-    }
+  @Bean
+  AuthenticationManager authenticationManager() throws Exception {
+    return new ProviderManager(jwtAuthenticationProvider(passwordEncoder(), userDetailsService));
+  }
 
-    @Bean
-    public PasswordEncoder passwordEncoder(){
-      return PasswordEncoderFactories.createDelegatingPasswordEncoder(); // bcrypt 사용
-    }
+  @Bean
+  public AuthenticationProvider jwtAuthenticationProvider(PasswordEncoder encoder, UserDetailsService service) {
+    return new JwtAuthenticationProvider(encoder, service);
+  }
 
-    @Bean
-    public AbstractAuthenticationProcessingFilter jwtAuthenticationFilter(
-      AuthenticationManager authenticationManager) throws Exception {
-        AbstractAuthenticationProcessingFilter filter = new JwtAuthenticationFilter(jwtTokenUtil, jwtProperties);
-      filter.setAuthenticationManager(authenticationManager);
-      filter.setFilterProcessesUrl("/api/login");
-      return filter;
-    }
+  @Bean
+  public PasswordEncoder passwordEncoder(){
+    return PasswordEncoderFactories.createDelegatingPasswordEncoder(); // bcrypt 사용
+  }
 }

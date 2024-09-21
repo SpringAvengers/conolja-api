@@ -4,9 +4,9 @@ spring:
       active: dev  # 어플리케이션의 프로파일 설정
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/conolja
+    url: jdbc:postgresql://postgres:5432/conolja?currentSchema=conolja
     username: conolja
-    password: conolja
+    password: conolja123!@#
 
 springdoc:
   servers:

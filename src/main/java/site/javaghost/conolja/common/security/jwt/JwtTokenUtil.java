@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,6 +29,10 @@ public class JwtTokenUtil {
     private final JwtProperties jwtProperties;
 
     public String parseToken(String headerValue) {
+        if (null == headerValue) {
+            throw new AuthenticationServiceException(jwtProperties.header() + " 헤더가 존재하지 않습니다");
+        }
+
         if(StringUtils.hasText(jwtProperties.header()) && headerValue.startsWith(jwtProperties.prefix())) {
             return headerValue.substring(jwtProperties.prefix().length() + 1); // +1 은 공백
         }

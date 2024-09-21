@@ -3,6 +3,9 @@ server:
     context-path: /api  # 서버의 기본 경로를 설정
 
 spring:
+  profiles:
+    active: dev
+
   application:
     name: conolja-api  # 어플리케이션 이름 설정
 
@@ -14,9 +17,11 @@ spring:
       ddl-auto: update  # 테이블이 없을 경우 생성, 테이블이 있을 경우 변경사항을 반영
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         show_sql: false
         format_sql: false
         default_batch_fetch_size: 100
+    open-in-view: false
 
 springdoc:
   api-docs:
@@ -41,3 +46,9 @@ jwt:
   refresh:
     expiration: 86400000 # 24시간
     header: Refresh
+
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG

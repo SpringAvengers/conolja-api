@@ -4,7 +4,7 @@ spring:
       active: local  # 어플리케이션의 프로파일 설정
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/conolja-local
+    url: jdbc:postgresql://localhost:5432/conolja-local?currentSchema=conolja
     username: mwjeong
     password: Wsxqaz1425!
 
