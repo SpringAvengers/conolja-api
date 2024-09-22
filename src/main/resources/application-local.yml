@@ -1,0 +1,13 @@
+spring:
+  config:
+    activate:
+      on-profile: local # 어플리케이션의 프로파일 설정
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/conolja-local?currentSchema=conolja
+    username: mwjeong
+    password: Wsxqaz1425!
+
+springdoc:
+  servers:
+    - "http://localhost:8080${server.servlet.context-path}"

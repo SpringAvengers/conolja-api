@@ -1,0 +1,51 @@
+server:
+  servlet:
+    context-path: /api  # 서버의 기본 경로를 설정
+
+spring:
+  application:
+    name: conolja-api  # 어플리케이션 이름 설정
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update  # 테이블이 없을 경우 생성, 테이블이 있을 경우 변경사항을 반영
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: false
+        format_sql: false
+        default_batch_fetch_size: 100
+    open-in-view: false
+
+springdoc:
+  api-docs:
+    path: /api-docs  # api-docs 접근 경로에 대한 별칭, 해당 주소로 접속해도 http://localhost:8080/v1/api-docs로 리다이렉션 됨.
+  swagger-ui:
+    path: /apis  # swagger-ui 접근 경로에 대한 별칭, 해당 주소로 접속해도 http://localhost:8080/v1/swagger-ui/index.html로 리다이렉션 됨.
+
+    groups-order: DESC # path, query, body, response 순으로 출력
+
+    tags-sorter: alpha # 태그를 알파벳 순으로 정렬
+
+    operations-sorter: method  # delete - get - patch - post - put 순으로 정렬, alpha를 사용하면 알파벳 순으로 정렬 가능
+  show-login-endpoint: true
+
+jwt:
+  secret: IDyR2qkVrZUbbkEobzqRU5CGMT8egOTBMgNejesrLKdUGflqxraX/QM3gKj+tly6JGSRkcmH8CPR+j/VfsZB2w==
+  expiration: 1800000 # 30분
+  header: Authorization
+  prefix: Bearer
+  issuer: conolja.site
+  type: JWT
+  refresh:
+    expiration: 86400000 # 24시간
+    header: Refresh
+
+logging:
+  level:
+    org:
+      springframework:
+        web: DEBUG
