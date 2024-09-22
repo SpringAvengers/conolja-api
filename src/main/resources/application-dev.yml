@@ -1,12 +1,8 @@
 spring:
-  application:
-    profiles:
-      active: dev  # 어플리케이션의 프로파일 설정
+  config:
+    activate:
+      on-profile: dev
 
-  datasource:
-    url: jdbc:postgresql://postgres:5432/conolja?currentSchema=conolja
-    username: conolja
-    password: conolja123!@#
 
 springdoc:
   servers:

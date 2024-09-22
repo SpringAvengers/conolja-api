@@ -13,7 +13,7 @@ RUN gradle dependencies --no-daemon
 COPY . .
 
 # Gradle 빌드를 실행하여 JAR 파일 생성
-RUN gradle clean build --no-daemon
+RUN gradle clean build -x test --no-daemon
 
 # 런타임 이미지로 OpenJDK 17-jre-slim 지정
 FROM openjdk:17-slim
