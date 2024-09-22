@@ -3,6 +3,11 @@ spring:
     activate:
       on-profile: dev
 
+  datasource:
+    url: jdbc:postgresql://postgres:5432/conolja-dev
+    username: conolja
+    password: conolja123!@#
+
 
 springdoc:
   servers:
