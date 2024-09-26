@@ -26,6 +26,7 @@ import site.javaghost.conolja.common.security.jwt.JwtValidationFilter;
 @EnableWebSecurity(debug = true)
 @RequiredArgsConstructor
 public class SecurityConfiguration {
+
   private final JwtValidationFilter jwtValidationFilter;
   private final UserDetailsService userDetailsService;
   private final JwtProperties jwtProperties;
@@ -34,25 +35,31 @@ public class SecurityConfiguration {
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
-      .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-      .csrf(AbstractHttpConfigurer::disable)
-      .httpBasic(AbstractHttpConfigurer::disable)
-      .formLogin(AbstractHttpConfigurer::disable)
-      .authorizeHttpRequests(auth -> auth
-              .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() // resources 접근 허용 설정
-              .requestMatchers("/api/auth/*").permitAll()
-              .requestMatchers("/api/apis", "/api/swagger-ui/*", "/api/swagger-ui.html", "/api/v3/api-docs/*").permitAll()
-              .anyRequest().authenticated()
-      )
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .csrf(AbstractHttpConfigurer::disable)
+            .cors(AbstractHttpConfigurer::disable)
+            .httpBasic(AbstractHttpConfigurer::disable)
+            .formLogin(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()  // static resources 허용
+                    .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/apis").permitAll()
+                    .requestMatchers("/swagger-ui/**", "/api-docs/**", "/api/swagger-ui.html").permitAll()
+                    .anyRequest().authenticated()  // 나머지 경로는 인증 요구
+            )
+
             // JWT 검증 필터는 UsernamePasswordAuthenticationFilter 이전에 실행
+
             .addFilterBefore(jwtValidationFilter, UsernamePasswordAuthenticationFilter.class)
             // JWT 인증 필터는 UsernamePasswordAuthenticationFilter 와 동일한 위치에서 실행
             .addFilterAt(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
             .authenticationProvider(jwtAuthenticationProvider(passwordEncoder(), userDetailsService));
+
     return http.build();
   }
 
-  @Bean JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
+  @Bean
+  JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
     JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtTokenUtil, jwtProperties);
     filter.setAuthenticationManager(authenticationManager());
     return filter;

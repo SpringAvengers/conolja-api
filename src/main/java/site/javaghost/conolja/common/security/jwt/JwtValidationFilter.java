@@ -30,6 +30,7 @@ public class JwtValidationFilter extends OncePerRequestFilter {
             }
 
             String headerValue = request.getHeader(jwtProperties.header());
+            log.info("Authorization header: {}", headerValue);
             String accessToken = jwtTokenUtil.parseToken(headerValue);
 
             // JWT 토큰이 유효하면 Authentication 꺼내서 SecurityContext 에 인증 정보를 저장
@@ -40,6 +41,7 @@ public class JwtValidationFilter extends OncePerRequestFilter {
         } catch (Exception e) {
             log.error("JWT 토큰 검증 오류", e);
         } finally {
+            log.info("SecurityContext: {}", SecurityContextHolder.getContext());
             filterChain.doFilter(request, response);
         }
     }
@@ -57,10 +59,10 @@ public class JwtValidationFilter extends OncePerRequestFilter {
         public static final String[] WHITE_LIST_URIS = {
                 "/api/auth",
                 "/api/login",
-                "/api/apis",
-                "/api/swagger-ui",
-                "/api/swagger-ui.html",
-                "/api/v3/api-docs"
+                "/apis",
+                "/swagger-ui",
+                "/swagger-ui.html",
+                "/api-docs"
         };
     }
 }
