@@ -58,6 +58,7 @@ public class JwtValidationFilter extends OncePerRequestFilter {
     static class JwtWhiteList {
         public static final String[] WHITE_LIST_URIS = {
                 "/api/auth",
+                "/api/auth/signup",
                 "/api/login",
                 "/apis",
                 "/swagger-ui",

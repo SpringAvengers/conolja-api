@@ -44,7 +44,7 @@ public class SecurityConfiguration {
                     .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()  // static resources 허용
                     .requestMatchers("/api/auth/**").permitAll()
                     .requestMatchers("/apis").permitAll()
-                    .requestMatchers("/swagger-ui/**", "/api-docs/**", "/api/swagger-ui.html").permitAll()
+                    .requestMatchers("/auth/**","/swagger-ui/**", "/api-docs/**", "/api/swagger-ui.html").permitAll()
                     .anyRequest().authenticated()  // 나머지 경로는 인증 요구
             )
 
