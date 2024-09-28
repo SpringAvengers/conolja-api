@@ -25,7 +25,7 @@ public class AuthService {
     }
     Account account = command.toEntity();
     account.encodePassword(passwordEncoder.encode(command.password()));
-    accountJpaRepository.save(command.toEntity());
+    accountJpaRepository.save(account);
   }
 
   public boolean checkDuplicate(String email) {
