@@ -23,7 +23,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
     }
     return new UsernamePasswordAuthenticationToken(
       userDetails.getUsername(),
-      userDetails.getPassword(),
+      null, // 인증 완료 후엔 credential 은 null 로 설정
       userDetails.getAuthorities());
   }
 
