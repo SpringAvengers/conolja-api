@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
@@ -25,20 +26,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
   }
 
   @Override
-  protected String obtainPassword(HttpServletRequest request) {
-    Authentication auth = getAuthentication(request.getHeader(jwtProperties.header()));
-    return (String) auth.getCredentials();
-  }
-
-  @Override
-  protected String obtainUsername(HttpServletRequest request) {
-    Authentication auth = getAuthentication(request.getHeader(jwtProperties.header()));
-    return auth.getName();
-  }
-
-  private Authentication getAuthentication(String headerValue) {
-    String accessToken = jwtTokenUtil.parseToken(headerValue);
-    return jwtTokenUtil.getAuthentication(accessToken);
+  public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+    return super.attemptAuthentication(request, response);
   }
 
   @Override

@@ -33,4 +33,11 @@ public class AuthController {
 
         return ResponseEntity.ok(Map.of("message", "로그인 성공"));
     }
+
+    @PostMapping("/issue")
+    @Operation(summary = "토큰 재발급", description = "토큰을 재발급 합니다.")
+    public ResponseEntity<Map<String, String>> issue(IssueRequest request) {
+
+        return ResponseEntity.ok(Map.of("message", "토큰 재발급 성공"));
+    }
 }
