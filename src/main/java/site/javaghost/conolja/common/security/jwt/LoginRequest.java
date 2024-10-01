@@ -1,4 +1,4 @@
-package site.javaghost.conolja.common.security.auth;
+package site.javaghost.conolja.common.security.jwt;
 
 import lombok.Builder;
 

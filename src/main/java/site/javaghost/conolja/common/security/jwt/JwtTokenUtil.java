@@ -6,20 +6,18 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import site.javaghost.conolja.common.security.auth.LoginRequest;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Date;
 
@@ -29,68 +27,32 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class JwtTokenUtil {
 
-    private final UserDetailsService userDetailsService;
     private final JwtProperties jwtProperties;
-    private final AuthenticationProvider authenticationProvider;
 
     public String parseToken(String headerValue) {
-        if (null == headerValue) {
-            throw new AuthenticationServiceException(jwtProperties.header() + " 헤더가 존재하지 않습니다");
+        // 헤더가 비어있는지 확인
+        if (!StringUtils.hasText(headerValue)) {
+            throw new AuthenticationServiceException(jwtProperties.header() + " 헤더가 존재하지 않습니다.");
         }
 
-        if(StringUtils.hasText(jwtProperties.header()) && headerValue.startsWith(jwtProperties.prefix())) {
-            return headerValue.substring(jwtProperties.prefix().length() + 1); // +1 은 공백
-        }
-        return null;
-    }
+        final String prefixWithSpace = jwtProperties.prefix() + " ";
 
-    public Authentication getAuthentication (String accessToken) {
-        try {
-            String username = extractUsername(accessToken);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        // 헤더가 prefix 로 시작하는지 확인
+        if (headerValue.startsWith(prefixWithSpace)) {
+            // prefix 이후의 토큰 부분 추출
+            return headerValue.substring(prefixWithSpace.length());
+        }
 
-            // 토큰 생성 및 반환
-            return new UsernamePasswordAuthenticationToken(
-              userDetails,
-              userDetails.getPassword(),
-              userDetails.getAuthorities());
-            
-        } catch (UsernameNotFoundException e) {
-            log.error(String.valueOf(e));
-            throw new BadCredentialsException("사용자를 찾을 수 없습니다.");
-        }
-    }
-    
-    public Authentication generateToken (String accessToken) {
-        try {
-            String username = extractUsername(accessToken);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            
-            // 토큰 생성 및 반환
-            return new UsernamePasswordAuthenticationToken(
-              userDetails,
-              userDetails.getPassword(),
-              userDetails.getAuthorities());
-            
-        } catch (UsernameNotFoundException e) {
-            log.error(String.valueOf(e));
-            throw new BadCredentialsException("사용자를 찾을 수 없습니다.");
-        }
+        // 헤더 형식이 잘못된 경우 예외 처리
+        throw new AuthenticationServiceException("잘못된 " + jwtProperties.header() + " 헤더 형식입니다.");
     }
 
     // JWT 에서 Claim 추출
-    private String extractUsername(String accessToken) {
+    public String extractUsername(String accessToken) {
         return getClaims(accessToken).getBody().getSubject();
     }
 
-    public JwtTokenDto generateToken(LoginRequest request){
-        String username = request.username();
-        String password = request.password();
-        Authentication token = UsernamePasswordAuthenticationToken.unauthenticated(username, password);
-        return generateToken(token);
-    }
-
-    // Jwt 토큰 생성
+    // JwtTokenDto 토큰 생성
     public JwtTokenDto generateToken(Authentication authentication) {
         // 사용자 정보 추출
         String username = authentication.getName();
@@ -103,29 +65,25 @@ public class JwtTokenUtil {
           // 만료 시간 = 현재 시각 + 유효 기간
           .setExpiration(new Date(System.currentTimeMillis() + jwtProperties.expiration().toMillis()))
           .setIssuedAt(new Date())
-          .signWith(getPrivateKey(jwtProperties.secret()))
+          .signWith(getPrivateKey(jwtProperties.secret()), SignatureAlgorithm.HS512)
           .compact();
 
         // 리프레시 토큰 생성
         String refreshToken = Jwts.builder()
           .setExpiration(new Date(System.currentTimeMillis() + jwtProperties.refresh().expiration().toMillis()))
-          .signWith(getPrivateKey(jwtProperties.secret()))
+          .signWith(getPrivateKey(jwtProperties.secret()), SignatureAlgorithm.HS512)
           .compact();
 
         return JwtTokenDto.by(accessToken, refreshToken, authority);
     }
 
-    private Key getPrivateKey(String secretKey) {
-        byte[] keyBytes = Base64.getDecoder().decode(secretKey);
-        return new SecretKeySpec(keyBytes, SignatureAlgorithm.RS512.getJcaName());
+    private SecretKeySpec getPrivateKey(String privateKeyBase64) {
+        byte[] keyBytes = Base64.getDecoder().decode(jwtProperties.secret());
+        return new SecretKeySpec(keyBytes, SignatureAlgorithm.HS512.getJcaName());
     }
 
     public boolean isTokenValid(String token) {
-        try {
-            return !hasExpired(getClaims(token));
-        }catch(Exception e) {
-            return false;
-        }
+        return !hasExpired(getClaims(token));
     }
 
     private Jws<Claims> getClaims(String token) {
