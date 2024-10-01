@@ -2,12 +2,17 @@ package site.javaghost.conolja.common.security;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static java.util.Arrays.stream;
 
 @Getter
 public class CustomUserDetails implements UserDetails, CredentialsContainer {
@@ -23,8 +28,16 @@ public class CustomUserDetails implements UserDetails, CredentialsContainer {
         this.authorities = authorities;
     }
 
-    public static UserDetails create(String username, String password, List<GrantedAuthority> authorities) {
+    public static UserDetails create(
+      String username,
+      String password,
+      Collection<? extends GrantedAuthority> authorities) {
         return CustomUserDetails.builder().username(username).password(password).authorities(authorities).build();
+    }
+
+    // 계정이 가지고 있는 권한 목록을 리턴
+    public Set<String> getRoles() {
+        return authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
     }
 
     // 계정 상태 관련 메서드 추가
