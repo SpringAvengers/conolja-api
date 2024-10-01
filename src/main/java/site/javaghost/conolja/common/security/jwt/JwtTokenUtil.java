@@ -6,11 +6,14 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import site.javaghost.conolja.common.security.auth.LoginRequest;
@@ -28,6 +31,7 @@ public class JwtTokenUtil {
 
     private final UserDetailsService userDetailsService;
     private final JwtProperties jwtProperties;
+    private final AuthenticationProvider authenticationProvider;
 
     public String parseToken(String headerValue) {
         if (null == headerValue) {
@@ -41,14 +45,37 @@ public class JwtTokenUtil {
     }
 
     public Authentication getAuthentication (String accessToken) {
-        String username = extractUsername(accessToken);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        try {
+            String username = extractUsername(accessToken);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-        // 토큰 생성 및 반환
-        return new UsernamePasswordAuthenticationToken(
-          userDetails,
-          userDetails.getPassword(),
-          userDetails.getAuthorities());
+            // 토큰 생성 및 반환
+            return new UsernamePasswordAuthenticationToken(
+              userDetails,
+              userDetails.getPassword(),
+              userDetails.getAuthorities());
+            
+        } catch (UsernameNotFoundException e) {
+            log.error(String.valueOf(e));
+            throw new BadCredentialsException("사용자를 찾을 수 없습니다.");
+        }
+    }
+    
+    public Authentication generateToken (String accessToken) {
+        try {
+            String username = extractUsername(accessToken);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            
+            // 토큰 생성 및 반환
+            return new UsernamePasswordAuthenticationToken(
+              userDetails,
+              userDetails.getPassword(),
+              userDetails.getAuthorities());
+            
+        } catch (UsernameNotFoundException e) {
+            log.error(String.valueOf(e));
+            throw new BadCredentialsException("사용자를 찾을 수 없습니다.");
+        }
     }
 
     // JWT 에서 Claim 추출
