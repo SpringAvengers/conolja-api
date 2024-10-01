@@ -41,18 +41,18 @@ public class SecurityConfiguration {
             .httpBasic(AbstractHttpConfigurer::disable)
             .formLogin(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()  // static resources 허용
-                    .requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers("/apis").permitAll()
-                    .requestMatchers("/auth/**","/swagger-ui/**", "/api-docs/**", "/api/swagger-ui.html").permitAll()
-                    .anyRequest().authenticated()  // 나머지 경로는 인증 요구
+              // context-path prefix ("/api") 는 붙일 필요 없음 -> spring 이 자동으로 인식함
+              .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()  // static resources 허용
+              .requestMatchers("/auth/**").permitAll() // 인증 관련 엔드포인트
+              .requestMatchers("/apis", "/swagger-ui/**","/api-docs/**").permitAll() // 스웨거
+              .requestMatchers("/error/**").permitAll() // 에러 페이지
+              .anyRequest().authenticated()  // 나머지 경로는 인증 요구
             )
 
             // JWT 검증 필터는 UsernamePasswordAuthenticationFilter 이전에 실행
-
             .addFilterBefore(jwtValidationFilter, UsernamePasswordAuthenticationFilter.class)
             // JWT 인증 필터는 UsernamePasswordAuthenticationFilter 와 동일한 위치에서 실행
-            .addFilterAt(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+//            .addFilterAt(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
             .authenticationProvider(jwtAuthenticationProvider(passwordEncoder(), userDetailsService));
 
     return http.build();

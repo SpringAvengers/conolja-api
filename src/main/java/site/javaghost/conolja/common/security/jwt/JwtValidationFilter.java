@@ -20,50 +20,35 @@ public class JwtValidationFilter extends OncePerRequestFilter {
     private final JwtTokenUtil jwtTokenUtil;
     private final JwtProperties jwtProperties;
 
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        try {
-            if(isWhiteList(request.getRequestURI())) {
-                return;
-            }
 
-            String headerValue = request.getHeader(jwtProperties.header());
-            log.info("Authorization header: {}", headerValue);
-            String accessToken = jwtTokenUtil.parseToken(headerValue);
+      final String authHeader = request.getHeader(jwtProperties.header());
 
-            // JWT 토큰이 유효하면 Authentication 꺼내서 SecurityContext 에 인증 정보를 저장
-            if (accessToken != null && jwtTokenUtil.isTokenValid(accessToken)) {
-                Authentication auth = jwtTokenUtil.getAuthentication(accessToken);
-                SecurityContextHolder.getContext().setAuthentication(auth);
-            }
-        } catch (Exception e) {
-            log.error("JWT 토큰 검증 오류", e);
-        } finally {
-            log.info("SecurityContext: {}", SecurityContextHolder.getContext());
-            filterChain.doFilter(request, response);
+      try {
+        // 인증이 필요없는 경우 (Authorization 헤더 없는 경우)
+        if(containsAuthHeader(authHeader)){
+            return;
         }
+
+        final String accessToken = jwtTokenUtil.parseToken(authHeader);
+
+        // JWT 토큰이 유효하면 Authentication 꺼내서 SecurityContext 에 인증 정보를 저장
+        if (accessToken != null && jwtTokenUtil.isTokenValid(accessToken)) {
+            Authentication auth = jwtTokenUtil.getAuthentication(accessToken);
+            SecurityContextHolder.getContext().setAuthentication(auth);
+        }
+      } catch (Exception e) {
+        log.error("JWT 토큰 검증 오류", e);
+      } finally {
+        filterChain.doFilter(request, response);
+      }
     }
 
-    private boolean isWhiteList(String uri) {
-        for(String whiteListUri : JwtWhiteList.WHITE_LIST_URIS) {
-            if(uri.matches(whiteListUri)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    static class JwtWhiteList {
-        public static final String[] WHITE_LIST_URIS = {
-                "/api/auth",
-                "/api/auth/signup",
-                "/api/login",
-                "/apis",
-                "/swagger-ui",
-                "/swagger-ui.html",
-                "/api-docs"
-        };
+    private boolean containsAuthHeader(String authHeader) {
+      return authHeader == null || !authHeader.startsWith(jwtProperties.prefix());
     }
 }
