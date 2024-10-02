@@ -2,6 +2,7 @@ package site.javaghost.conolja.common.security;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -9,10 +10,10 @@ import java.util.Collection;
 import java.util.List;
 
 @Getter
-public class CustomUserDetails implements UserDetails {
+public class CustomUserDetails implements UserDetails, CredentialsContainer {
 
-    private String username;
-    private String password;
+    private final String username;
+    private final String password;
     private Collection<? extends GrantedAuthority> authorities;
 
     @Builder
@@ -49,5 +50,10 @@ public class CustomUserDetails implements UserDetails {
     public boolean isEnabled() {
         // true 반환 시 계정이 활성화되어 있음을 의미
         return true;  // 실제로 계정 활성화 여부를 체크하는 로직을 추가할 수 있음
+    }
+
+    @Override
+    public void eraseCredentials() {
+        this.authorities = null;
     }
 }
