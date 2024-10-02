@@ -1,0 +1,14 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+
+  datasource:
+    url: jdbc:postgresql://postgres:5432/conolja-local
+    username: conolja
+    password: conolja123!@#
+
+
+springdoc:
+  servers:
+    - "http://localhost:8080/${server.servlet.context-path}"
