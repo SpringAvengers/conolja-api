@@ -1,5 +1,6 @@
 package site.javaghost.conolja.common.security;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -52,8 +53,25 @@ public class SecurityConfiguration {
 
             .addFilterBefore(jwtValidationFilter, UsernamePasswordAuthenticationFilter.class)
             // JWT 인증 필터는 UsernamePasswordAuthenticationFilter 와 동일한 위치에서 실행
-            .addFilterAt(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
-            .authenticationProvider(jwtAuthenticationProvider(passwordEncoder(), userDetailsService));
+            .addFilterAfter(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+            .authenticationProvider(jwtAuthenticationProvider(passwordEncoder(), userDetailsService))
+            //커스텀 에러 핸들링
+            .exceptionHandling(exception -> exception
+                    // 권한이 없을 때 (403) 커스텀 처리
+                    .accessDeniedHandler((request, response, accessDeniedException) -> { // 인가 핸들러
+                      response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                      response.setCharacterEncoding("UTF-8");
+                      response.setContentType("text/plain; charset=UTF-8");
+                      response.getWriter().write("권한이 없는 사용자 : 403 Error.");
+                    })
+                    // 인증되지 않은 사용자가 접근할 때 (401)
+                    .authenticationEntryPoint((request, response, authException) -> { // 인증 핸들러
+                      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                      response.setCharacterEncoding("UTF-8");
+                      response.setContentType("text/plain; charset=UTF-8");
+                      response.getWriter().write("인증되지 않은 사용자 : 401 Error.");
+                    })
+            );
 
     return http.build();
   }
