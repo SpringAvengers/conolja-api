@@ -14,6 +14,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import site.javaghost.conolja.common.security.jwt.JwtProperties;
+import site.javaghost.conolja.common.security.jwt.JwtTokenUtil;
 import site.javaghost.conolja.common.security.jwt.JwtValidationFilter;
 import site.javaghost.conolja.common.security.jwt.LoginFilter;
 
@@ -22,8 +24,9 @@ import site.javaghost.conolja.common.security.jwt.LoginFilter;
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
-  private final JwtValidationFilter jwtValidationFilter;
   private final AuthenticationProvider jwtAuthenticationProvider;
+  private final JwtTokenUtil jwtTokenUtil;
+  private final JwtProperties jwtProps;
 
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -43,7 +46,7 @@ public class SecurityConfiguration {
       )
       // JWT 검증 필터는 UsernamePasswordAuthenticationFilter 이전에 실행
       .addFilterBefore(loginFilter(http), UsernamePasswordAuthenticationFilter.class)
-      .addFilterBefore(jwtValidationFilter, LoginFilter.class)
+      .addFilterBefore(jwtValidationFilter(jwtTokenUtil, jwtProps), LoginFilter.class)
       //커스텀 에러 핸들링
       .exceptionHandling(exception -> exception
         // 권한이 없을 때 (403) 커스텀 처리
@@ -65,9 +68,16 @@ public class SecurityConfiguration {
     return http.build();
   }
 
+  // 로그인 필터
   @Bean
   LoginFilter loginFilter(HttpSecurity http) throws Exception {
     return new LoginFilter(authenticationManager(http));
+  }
+
+  // JWT 토큰 유효성 검증 필터
+  @Bean
+  JwtValidationFilter jwtValidationFilter(JwtTokenUtil util, JwtProperties props) {
+    return new JwtValidationFilter(util, props);
   }
 
   @Bean

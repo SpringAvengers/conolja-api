@@ -8,10 +8,10 @@ import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 import site.javaghost.conolja.common.security.CustomUserDetails;
@@ -47,7 +47,7 @@ public class LoginFilter extends OncePerRequestFilter {
       // 인증 정보가 있는 경우
       successfulAuthentication(wrappedRequest, response, filterChain, auth);
     } catch (RuntimeException e) {
-      throw new RuntimeException(e.getMessage());
+      throw new AccessDeniedException(e.getMessage());
     }
   }
 
@@ -55,7 +55,7 @@ public class LoginFilter extends OncePerRequestFilter {
     try {
       return new CustomRequestWrapper(request);
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new AccessDeniedException(e.getMessage());
     }
   }
 
@@ -64,7 +64,7 @@ public class LoginFilter extends OncePerRequestFilter {
     return request.getRequestURI().matches(LOGIN_URI);
   }
 
-  public Authentication attemptAuthentication(HttpServletRequest request) throws AuthenticationException {
+  public Authentication attemptAuthentication(HttpServletRequest request) throws AccessDeniedException {
     LoginRequest loginInfo = getLoginInfo(request);
 
     // accessToken 을 이용해 인증 정보 생성 (아직 인증 전 단계)
@@ -79,12 +79,12 @@ public class LoginFilter extends OncePerRequestFilter {
 
   }
 
-  private LoginRequest getLoginInfo(HttpServletRequest request) {
+  private LoginRequest getLoginInfo(HttpServletRequest request) throws AccessDeniedException {
     ObjectMapper objectMapper = new ObjectMapper();
     try {
       return objectMapper.readValue(request.getInputStream(), LoginRequest.class);
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new AccessDeniedException(e.getMessage());
     }
   }
 
