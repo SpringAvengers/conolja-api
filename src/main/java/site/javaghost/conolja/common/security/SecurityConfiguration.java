@@ -13,7 +13,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import site.javaghost.conolja.common.security.jwt.JwtAuthenticationFilter;
+import site.javaghost.conolja.common.security.jwt.LoginFilter;
 import site.javaghost.conolja.common.security.jwt.JwtProperties;
 import site.javaghost.conolja.common.security.jwt.JwtTokenUtil;
 import site.javaghost.conolja.common.security.jwt.JwtValidationFilter;
@@ -45,16 +45,15 @@ public class SecurityConfiguration {
         .anyRequest().authenticated()  // 나머지 경로는 인증 요구
       )
       // JWT 검증 필터는 UsernamePasswordAuthenticationFilter 이전에 실행
-      .addFilterBefore(jwtValidationFilter, UsernamePasswordAuthenticationFilter.class)
-      .addFilterAt(jwtAuthenticationFilter(http), UsernamePasswordAuthenticationFilter.class);
+      .addFilterBefore(loginFilter(http), UsernamePasswordAuthenticationFilter.class)
+      .addFilterBefore(jwtValidationFilter, LoginFilter.class)
+      ;
     return http.build();
   }
 
   @Bean
-  JwtAuthenticationFilter jwtAuthenticationFilter(HttpSecurity http) throws Exception {
-    JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtTokenUtil, jwtProperties);
-    filter.setAuthenticationManager(authenticationManager(http));
-    return filter;
+  LoginFilter loginFilter(HttpSecurity http) throws Exception {
+    return new LoginFilter(authenticationManager(http));
   }
 
   @Bean
