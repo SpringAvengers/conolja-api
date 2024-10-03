@@ -14,10 +14,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import site.javaghost.conolja.common.security.jwt.JwtProperties;
-import site.javaghost.conolja.common.security.jwt.LoginFilter;
-import site.javaghost.conolja.common.security.jwt.JwtTokenUtil;
 import site.javaghost.conolja.common.security.jwt.JwtValidationFilter;
+import site.javaghost.conolja.common.security.jwt.LoginFilter;
 
 @Configuration
 @EnableWebSecurity(debug = true)
@@ -26,29 +24,23 @@ public class SecurityConfiguration {
 
   private final JwtValidationFilter jwtValidationFilter;
   private final AuthenticationProvider jwtAuthenticationProvider;
-  private final JwtProperties jwtProperties;
-  private final JwtTokenUtil jwtTokenUtil;
 
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .csrf(AbstractHttpConfigurer::disable)
-            .cors(AbstractHttpConfigurer::disable)
-            .httpBasic(AbstractHttpConfigurer::disable)
-            .formLogin(AbstractHttpConfigurer::disable)
-            .authorizeHttpRequests(auth -> auth
-              // context-path prefix ("/api") 는 붙일 필요 없음 -> spring 이 자동으로 인식함
-              .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()  // static resources 허용
-              .requestMatchers("/auth/**").permitAll() // 인증 관련 엔드포인트
-              .requestMatchers("/apis", "/swagger-ui/**","/api-docs/**").permitAll() // 스웨거
-              .requestMatchers("/error/**").permitAll() // 에러 페이지
-              .anyRequest().authenticated()  // 나머지 경로는 인증 요구
-            )
-
-            // JWT 검증 필터는 UsernamePasswordAuthenticationFilter 이전에 실행
-
-            .addFilterBefore(jwtValidationFilter, UsernamePasswordAuthenticationFilter.class)
+      .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+      .csrf(AbstractHttpConfigurer::disable)
+      .cors(AbstractHttpConfigurer::disable)
+      .httpBasic(AbstractHttpConfigurer::disable)
+      .formLogin(AbstractHttpConfigurer::disable)
+      .authorizeHttpRequests(auth -> auth
+        // context-path prefix ("/api") 는 붙일 필요 없음 -> spring 이 자동으로 인식함
+        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()  // static resources 허용
+        .requestMatchers("/auth/**").permitAll() // 인증 관련 엔드포인트
+        .requestMatchers("/apis", "/swagger-ui/**","/api-docs/**").permitAll() // 스웨거
+        .requestMatchers("/error/**").permitAll() // 에러 페이지
+        .anyRequest().authenticated()  // 나머지 경로는 인증 요구
+      )
       // JWT 검증 필터는 UsernamePasswordAuthenticationFilter 이전에 실행
       .addFilterBefore(loginFilter(http), UsernamePasswordAuthenticationFilter.class)
       .addFilterBefore(jwtValidationFilter, LoginFilter.class)
