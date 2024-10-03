@@ -6,18 +6,12 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import site.javaghost.conolja.common.exception.exceptions.JwtAuthenticationException;
 
 import javax.crypto.spec.SecretKeySpec;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Date;
 
@@ -32,19 +26,18 @@ public class JwtTokenUtil {
     public String parseToken(String headerValue) {
         // 헤더가 비어있는지 확인
         if (!StringUtils.hasText(headerValue)) {
-            throw new AuthenticationServiceException(jwtProperties.header() + " 헤더가 존재하지 않습니다.");
+            throw JwtAuthenticationException.invalidAuthorizationHeader(headerValue);
         }
 
         final String prefixWithSpace = jwtProperties.prefix() + " ";
 
-        // 헤더가 prefix 로 시작하는지 확인
-        if (headerValue.startsWith(prefixWithSpace)) {
-            // prefix 이후의 토큰 부분 추출
-            return headerValue.substring(prefixWithSpace.length());
+        // 헤더가 Bearer 인지 아닌지 확인
+        if (!headerValue.startsWith(prefixWithSpace)) {
+            // 헤더 형식이 잘못된 경우 예외 처리
+            throw JwtAuthenticationException.invalidType(headerValue);
         }
-
-        // 헤더 형식이 잘못된 경우 예외 처리
-        throw new AuthenticationServiceException("잘못된 " + jwtProperties.header() + " 헤더 형식입니다.");
+        // prefix 이후의 토큰 부분 추출
+        return headerValue.substring(prefixWithSpace.length());
     }
 
     // JWT 에서 Claim 추출
@@ -77,13 +70,13 @@ public class JwtTokenUtil {
         return JwtTokenDto.by(accessToken, refreshToken, authority);
     }
 
-    private SecretKeySpec getPrivateKey(String privateKeyBase64) {
-        byte[] keyBytes = Base64.getDecoder().decode(jwtProperties.secret());
+    private SecretKeySpec getPrivateKey(String secretKey) {
+        byte[] keyBytes = Base64.getDecoder().decode(secretKey);
         return new SecretKeySpec(keyBytes, SignatureAlgorithm.HS512.getJcaName());
     }
 
-    public boolean isTokenValid(String token) {
-        return !hasExpired(getClaims(token));
+    public boolean hasExpired(String token) {
+        return hasExpired(getClaims(token));
     }
 
     private Jws<Claims> getClaims(String token) {
