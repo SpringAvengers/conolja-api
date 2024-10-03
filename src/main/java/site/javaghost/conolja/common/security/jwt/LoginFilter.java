@@ -10,11 +10,16 @@ import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.filter.OncePerRequestFilter;
+import site.javaghost.conolja.common.exception.ErrorCode;
 import site.javaghost.conolja.common.security.CustomUserDetails;
+import site.javaghost.conolja.common.exception.exceptions.JwtAuthenticationException;
 import site.javaghost.conolja.common.servlet.CustomRequestWrapper;
 
 import java.io.IOException;
@@ -46,8 +51,13 @@ public class LoginFilter extends OncePerRequestFilter {
       Authentication auth = attemptAuthentication(wrappedRequest);
       // 인증 정보가 있는 경우
       successfulAuthentication(wrappedRequest, response, filterChain, auth);
+    } catch (UsernameNotFoundException e) {
+      throw JwtAuthenticationException.of(e);
+    } catch (BadCredentialsException e) {
+      throw JwtAuthenticationException.of(e);
     } catch (RuntimeException e) {
-      throw new AccessDeniedException(e.getMessage());
+      log.error("로그인 정보를 읽어오는데 실패했습니다.", e);
+      throw e;
     }
   }
 
@@ -55,22 +65,20 @@ public class LoginFilter extends OncePerRequestFilter {
     try {
       return new CustomRequestWrapper(request);
     } catch (IOException e) {
-      throw new AccessDeniedException(e.getMessage());
+      throw new RuntimeException(e);
     }
   }
 
   private boolean isLoginUri(HttpServletRequest request) {
-    log.info("requestURI: {}", request.getRequestURI());
     return request.getRequestURI().matches(LOGIN_URI);
   }
 
-  public Authentication attemptAuthentication(HttpServletRequest request) throws AccessDeniedException {
+  public Authentication attemptAuthentication(HttpServletRequest request) throws AuthenticationException {
     LoginRequest loginInfo = getLoginInfo(request);
 
     // accessToken 을 이용해 인증 정보 생성 (아직 인증 전 단계)
     String username = loginInfo.username();
     String password = loginInfo.password();
-    log.info("username: {}, password: {}", username, password);
     UsernamePasswordAuthenticationToken preAuthToken =
       UsernamePasswordAuthenticationToken.unauthenticated(CustomUserDetails.create(username, password, List.of()), password);
 
@@ -79,12 +87,13 @@ public class LoginFilter extends OncePerRequestFilter {
 
   }
 
-  private LoginRequest getLoginInfo(HttpServletRequest request) throws AccessDeniedException {
+  private LoginRequest getLoginInfo(HttpServletRequest request) {
     ObjectMapper objectMapper = new ObjectMapper();
     try {
       return objectMapper.readValue(request.getInputStream(), LoginRequest.class);
     } catch (IOException e) {
-      throw new AccessDeniedException(e.getMessage());
+      log.error("로그인 정보를 읽어오는데 실패했습니다.", e);
+      throw new RuntimeException(e);
     }
   }
 
