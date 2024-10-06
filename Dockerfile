@@ -13,7 +13,8 @@ RUN gradle dependencies --no-daemon
 COPY . .
 
 # Gradle 빌드를 실행하여 JAR 파일 생성
-RUN gradle clean build -x test --no-daemon
+#RUN gradle clean build -x test --no-daemon (테스트 실행 제외 버전)
+RUN gradle clean build --no-daemon
 
 # 런타임 이미지로 OpenJDK 17-jre-slim 지정
 FROM openjdk:17-slim
@@ -22,8 +23,8 @@ FROM openjdk:17-slim
 WORKDIR /app
 
 # 빌드 이미지에서 생성된 JAR 파일을 런타임 이미지로 복사
-COPY --from=build /app/build/libs/*.jar /app/conolja-0.0.1-SNAPSHOT.jar
+COPY --from=build /app/build/libs/*.jar /app/conolja.jar
 
 EXPOSE 8080 
 ENTRYPOINT ["java"] 
-CMD ["-jar", "conolja-0.0.1-SNAPSHOT.jar"]
+CMD ["-jar", "conolja.jar"]

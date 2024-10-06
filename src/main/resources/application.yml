@@ -6,9 +6,6 @@ spring:
   application:
     name: conolja-api  # 어플리케이션 이름 설정
 
-  datasource:
-    driver-class-name: org.postgresql.Driver
-
   jpa:
     hibernate:
       ddl-auto: update  # 테이블이 없을 경우 생성, 테이블이 있을 경우 변경사항을 반영
