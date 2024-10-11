@@ -23,8 +23,8 @@ FROM openjdk:17-slim
 WORKDIR /app
 
 # 빌드 이미지에서 생성된 JAR 파일을 런타임 이미지로 복사
-COPY --from=build /app/build/libs/*.jar /app/conolja.jar
+COPY --from=build /app/build/libs/conolja.jar /app
 
 EXPOSE 8080 
 ENTRYPOINT ["java"] 
-CMD ["-jar", "conolja.jar"]
+CMD ["-jar", "/app/conolja.jar"]
