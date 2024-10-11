@@ -18,10 +18,15 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
   @Override
   public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
     log.error("JwtAuthenticationEntryPoint : {}", authException.getMessage());
+    log.info("request: {}", request);
+    log.info("request.getRequestURI: {}", request.getRequestURI());
+    log.info("request.getPathInfo(): {}", request.getPathInfo());
     ObjectMapper objectMapper = new ObjectMapper();
     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     response.setCharacterEncoding("UTF-8");
     response.setContentType("application/json; charset=UTF-8");
     response.getWriter().write("인증되지 않은 사용자 : 401 Error.");
+    response.getWriter().write("request.getPathInfo(): " + request.getPathInfo());
+    response.getWriter().write("request.getRequestURI(): " + request.getRequestURI());
   }
 }
