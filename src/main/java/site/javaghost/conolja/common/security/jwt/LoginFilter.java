@@ -8,7 +8,6 @@ import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,9 +16,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.filter.OncePerRequestFilter;
-import site.javaghost.conolja.common.exception.ErrorCode;
-import site.javaghost.conolja.common.security.CustomUserDetails;
 import site.javaghost.conolja.common.exception.exceptions.JwtAuthenticationException;
+import site.javaghost.conolja.common.security.CustomUserDetails;
 import site.javaghost.conolja.common.servlet.CustomRequestWrapper;
 
 import java.io.IOException;
@@ -31,6 +29,7 @@ public class LoginFilter extends OncePerRequestFilter {
   private final AuthenticationManager authManager;
 
   private static final String LOGIN_URI = "/api/auth/login"; // 로그인 요청 URI
+
 
   @Builder
   public LoginFilter(AuthenticationManager authManager) {

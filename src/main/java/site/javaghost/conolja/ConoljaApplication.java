@@ -12,13 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 @ConfigurationPropertiesScan
 public class ConoljaApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ConoljaApplication.class, args);
-	}
+  public static void main(String[] args) {
+    SpringApplication.run(ConoljaApplication.class, args);
+    System.out.println("Hello, Conolja!20241011");
+  }
 
-	@GetMapping("/ping")
-	@Hidden
-	public String ping() {
-		return "ping";
-	}
+  @GetMapping("/ping")
+  @Hidden
+  public String ping() {
+    return "ping";
+  }
 }

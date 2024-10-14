@@ -30,29 +30,30 @@ public class SecurityConfiguration {
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .csrf(AbstractHttpConfigurer::disable)
-            .cors(AbstractHttpConfigurer::disable)
-            .httpBasic(AbstractHttpConfigurer::disable)
-            .formLogin(AbstractHttpConfigurer::disable)
-            .authorizeHttpRequests(auth -> auth
-              // context-path prefix ("/api") 는 붙일 필요 없음 -> spring 이 자동으로 인식함
-              .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()  // static resources 허용
-              .requestMatchers("/auth/**").permitAll() // 인증 관련 엔드포인트
-              .requestMatchers("/apis", "/swagger-ui/**","/api-docs/**").permitAll() // 스웨거
-              .requestMatchers("/error/**").permitAll() // 에러 페이지
-              .anyRequest().authenticated()  // 나머지 경로는 인증 요구
-            )
-            .addFilterBefore(loginFilter(http), UsernamePasswordAuthenticationFilter.class)
-            .addFilterBefore(jwtValidationFilter, LoginFilter.class)
-            .addFilterBefore(exceptionHandlerFilter(), JwtValidationFilter.class)
-            //커스텀 에러 핸들링
-            .exceptionHandling(exception -> exception
-              // 권한이 없을 때 (403) 커스텀 처리
-              .accessDeniedHandler(accessDeniedHandler())
-              // 인증되지 않은 사용자가 접근할 때 (401)
-              .authenticationEntryPoint(authenticationEntryPoint())
-            );
+      .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+      .csrf(AbstractHttpConfigurer::disable)
+      .cors(AbstractHttpConfigurer::disable)
+      .httpBasic(AbstractHttpConfigurer::disable)
+      .formLogin(AbstractHttpConfigurer::disable)
+      .authorizeHttpRequests(auth -> auth
+        // context-path prefix ("/api") 는 붙일 필요 없음 -> spring 이 자동으로 인식함
+        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()  // static resources 허용
+        .requestMatchers("/auth/**").permitAll() // 인증 관련 엔드포인트
+        .requestMatchers("/favicon.ico").permitAll() // 파비콘
+        .requestMatchers("/apis/**", "/apis/favicon.ico", "/swagger-ui/**", "/api-docs/**").permitAll() // 스웨거
+        .requestMatchers("/error/**").permitAll() // 에러 페이지
+        .anyRequest().authenticated()  // 나머지 경로는 인증 요구
+      )
+      .addFilterBefore(loginFilter(http), UsernamePasswordAuthenticationFilter.class)
+      .addFilterBefore(jwtValidationFilter, LoginFilter.class)
+      .addFilterBefore(exceptionHandlerFilter(), JwtValidationFilter.class)
+      //커스텀 에러 핸들링
+      .exceptionHandling(exception -> exception
+        // 권한이 없을 때 (403) 커스텀 처리
+        .accessDeniedHandler(accessDeniedHandler())
+        // 인증되지 않은 사용자가 접근할 때 (401)
+        .authenticationEntryPoint(authenticationEntryPoint())
+      );
 
     return http.build();
   }
