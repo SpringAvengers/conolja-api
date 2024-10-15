@@ -1,7 +1,3 @@
-server:
-  servlet:
-    context-path: /api  # 서버의 기본 경로를 설정
-
 spring:
   application:
     name: conolja-api  # 어플리케이션 이름 설정
