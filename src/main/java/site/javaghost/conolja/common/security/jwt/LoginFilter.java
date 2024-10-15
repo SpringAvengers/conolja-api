@@ -28,7 +28,7 @@ public class LoginFilter extends OncePerRequestFilter {
 
   private final AuthenticationManager authManager;
 
-  private static final String LOGIN_URI = "/api/auth/login"; // 로그인 요청 URI
+  private static final String LOGIN_URI = "/auth/login"; // 로그인 요청 URI
 
 
   @Builder
