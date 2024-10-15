@@ -36,11 +36,9 @@ public class SecurityConfiguration {
       .httpBasic(AbstractHttpConfigurer::disable)
       .formLogin(AbstractHttpConfigurer::disable)
       .authorizeHttpRequests(auth -> auth
-        // context-path prefix ("/api") 는 붙일 필요 없음 -> spring 이 자동으로 인식함
         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()  // static resources 허용
         .requestMatchers("/auth/**").permitAll() // 인증 관련 엔드포인트
-        .requestMatchers("/favicon.ico").permitAll() // 파비콘
-        .requestMatchers("/apis/**", "/apis/favicon.ico", "/swagger-ui/**", "/api-docs/**").permitAll() // 스웨거
+        .requestMatchers("/apis/**", "/swagger-ui/**", "/api-docs/**").permitAll() // 스웨거
         .requestMatchers("/error/**").permitAll() // 에러 페이지
         .anyRequest().authenticated()  // 나머지 경로는 인증 요구
       )
