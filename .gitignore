@@ -39,3 +39,4 @@ out/
 ### local ###
 application-local.yml
 application-test.yml
+docker-compose.yml
