@@ -53,7 +53,6 @@ public class AuthController {
   @Operation(summary = "토큰 재발급", description = "리프래시 토큰을 통해 액세스 토큰을 재발급 합니다.")
   public ResponseEntity<JwtTokenDto> reIssue(HttpServletRequest request) {
     String headerValue = request.getHeader(props.header());
-    log.info("authorization: {}", headerValue);
     String token = jwtTokenUtil.parseToken(headerValue);
     return ResponseEntity.ok(jwtTokenUtil.reIssueToken(token));
   }
