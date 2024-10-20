@@ -14,7 +14,7 @@ public class ConoljaApplication {
 
   public static void main(String[] args) {
     SpringApplication.run(ConoljaApplication.class, args);
-    System.out.println("Hello, Conolja!20241011");
+    System.out.println("Hello, Conolja!20241020");
   }
 
   @GetMapping("/ping")
