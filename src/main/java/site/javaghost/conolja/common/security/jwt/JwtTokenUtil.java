@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import site.javaghost.conolja.common.exception.exceptions.JwtAuthenticationException;
+import site.javaghost.conolja.common.exception.JwtAuthenticationException;
 import site.javaghost.conolja.common.security.AccountRole;
 
 import javax.crypto.spec.SecretKeySpec;

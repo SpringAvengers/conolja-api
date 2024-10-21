@@ -1,9 +1,8 @@
-package site.javaghost.conolja.common.exception.exceptions;
+package site.javaghost.conolja.common.exception;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import site.javaghost.conolja.common.exception.ErrorCode;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

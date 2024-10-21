@@ -16,7 +16,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.filter.OncePerRequestFilter;
-import site.javaghost.conolja.common.exception.exceptions.JwtAuthenticationException;
+import site.javaghost.conolja.common.exception.JwtAuthenticationException;
 import site.javaghost.conolja.common.security.CustomUserDetails;
 import site.javaghost.conolja.common.servlet.CustomRequestWrapper;
 
@@ -51,9 +51,9 @@ public class LoginFilter extends OncePerRequestFilter {
       // 인증 정보가 있는 경우
       successfulAuthentication(wrappedRequest, response, filterChain, auth);
     } catch (UsernameNotFoundException e) {
-      throw JwtAuthenticationException.of(e);
+      throw JwtAuthenticationException.usernameNotFound(e);
     } catch (BadCredentialsException e) {
-      throw JwtAuthenticationException.of(e);
+      throw JwtAuthenticationException.badCredentials(e);
     } catch (RuntimeException e) {
       log.error("로그인 정보를 읽어오는데 실패했습니다.", e);
       throw e;
