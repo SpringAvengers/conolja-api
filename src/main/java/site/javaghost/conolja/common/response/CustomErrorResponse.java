@@ -1,32 +1,31 @@
 package site.javaghost.conolja.common.response;
 
 import lombok.Builder;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import site.javaghost.conolja.common.exception.ErrorCode;
 
-@Getter
-@RequiredArgsConstructor
-public class CustomErrorResponse {
+import java.time.LocalDateTime;
+import java.util.List;
 
-  private String path;
-  private String message;
-  private int status;
-  private Object details;
+@Builder
+public record CustomErrorResponse(
+  String path,
+  ErrorCode errorCode,
+  LocalDateTime timestamp,
+  String message,
+  List<Object> details
+) {
 
-  @Builder
-  private CustomErrorResponse(String path, String message, int status, Object details) {
-    this.path = path;
-    this.message = message;
-    this.status = status;
-    this.details = details;
+  public static CustomErrorResponse withSingleDetail(String path, ErrorCode errorCode, LocalDateTime timestamp, Object detail) {
+    return withDetails(path, errorCode, timestamp, List.of(detail));
   }
 
-  public static CustomErrorResponse create(String path, ErrorCode errorCode) {
+  public static CustomErrorResponse withDetails(String path, ErrorCode errorCode, LocalDateTime timestamp, List<Object> details) {
     return CustomErrorResponse.builder()
       .path(path)
-      .status(errorCode.getStatus())
+      .errorCode(errorCode)
+      .timestamp(timestamp)
       .message(errorCode.getMessage())
+      .details(details)
       .build();
   }
 }
