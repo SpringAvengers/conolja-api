@@ -1,5 +1,6 @@
 package site.javaghost.conolja.common.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -26,6 +27,7 @@ public class SecurityConfiguration {
 
   private final JwtValidationFilter jwtValidationFilter;
   private final AuthenticationProvider jwtAuthenticationProvider;
+  private final ObjectMapper objectMapper;
 
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -80,6 +82,6 @@ public class SecurityConfiguration {
 
   @Bean
   public ExceptionHandlerFilter exceptionHandlerFilter() {
-    return new ExceptionHandlerFilter();
+    return new ExceptionHandlerFilter(objectMapper);
   }
 }
