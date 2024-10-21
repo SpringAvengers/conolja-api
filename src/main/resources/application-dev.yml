@@ -1,0 +1,26 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://postgres:5432/conolja-dev
+    username: conolja
+    password: conolja123!@#
+
+  jpa:
+    hibernate:
+      ddl-auto: update  # 테이블이 없을 경우 생성, 테이블이 있을 경우 변경사항을 반영
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: false
+        format_sql: false
+        default_batch_fetch_size: 100
+    open-in-view: false
+
+
+springdoc:
+  servers:
+    - "https://api.conolja.site"

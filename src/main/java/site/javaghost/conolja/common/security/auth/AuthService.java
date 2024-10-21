@@ -1,0 +1,31 @@
+package site.javaghost.conolja.common.security.auth;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import site.javaghost.conolja.domains.account.application.AccountCreateCommand;
+import site.javaghost.conolja.domains.account.domain.Account;
+import site.javaghost.conolja.domains.account.infra.AccountJpaRepository;
+
+@Service
+@RequiredArgsConstructor
+public class AuthService {
+  private final AccountJpaRepository accountJpaRepository;
+  private final PasswordEncoder passwordEncoder;
+
+  @Transactional
+  public void signup(AccountCreateCommand command) {
+    String username = command.email();
+    if (checkDuplicate(username)) {
+      throw new IllegalArgumentException("이미 존재하는 계정입니다. - " + username);
+    }
+    Account account = command.toEntity();
+    account.encodePassword(passwordEncoder.encode(command.password()));
+    accountJpaRepository.save(account);
+  }
+
+  public boolean checkDuplicate(String email) {
+    return accountJpaRepository.existsByUsername(email);
+  }
+}
