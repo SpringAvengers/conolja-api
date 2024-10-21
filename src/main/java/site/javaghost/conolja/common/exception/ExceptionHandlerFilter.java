@@ -6,7 +6,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.filter.OncePerRequestFilter;
-import site.javaghost.conolja.common.exception.exceptions.JwtAuthenticationException;
 import site.javaghost.conolja.common.response.CustomErrorResponse;
 
 import java.io.IOException;
