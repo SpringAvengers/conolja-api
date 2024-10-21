@@ -21,7 +21,7 @@ import site.javaghost.conolja.common.security.jwt.JwtValidationFilter;
 import site.javaghost.conolja.common.security.jwt.LoginFilter;
 
 @Configuration
-@EnableWebSecurity(debug = true)
+@EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
@@ -77,7 +77,7 @@ public class SecurityConfiguration {
 
   @Bean
   public AccessDeniedHandler accessDeniedHandler() {
-    return new CustomAccessDeniedHandler();
+    return new CustomAccessDeniedHandler(objectMapper);
   }
 
   @Bean

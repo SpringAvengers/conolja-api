@@ -10,6 +10,7 @@ public enum ErrorCode {
   BAD_REQUEST(400, "잘못된 요청입니다."),
 
   JWT_INVALID_TOKEN(401, "유효하지 않은 토큰입니다."),
+  JWT_UNSUPPORTED_TOKEN(401, "지원하지 않는 JWT 토큰 유형입니다."),
   JWT_TOKEN_EXPIRED(401, "만료된 토큰입니다."),
   JWT_INVALID_AUTHORIZATION_HEADER(401, "헤더 정보가 유효하지 않습니다."),
   JWT_INVALID_ISSUER(401, "발급자 정보가 유효하지 않습니다."),

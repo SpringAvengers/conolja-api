@@ -1,20 +1,32 @@
 package site.javaghost.conolja.common.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import site.javaghost.conolja.common.response.CustomErrorResponse;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.List;
 
+@Slf4j
+@RequiredArgsConstructor
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
+  private final ObjectMapper objectMapper;
 
   @Override
-  public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
-    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+  public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException e) throws IOException, ServletException {
+    log.error("CustomAccessDeniedHandler: ", e);
+    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
     response.setCharacterEncoding("UTF-8");
     response.setContentType("text/plain; charset=UTF-8");
-    response.getWriter().write("인증되지 않은 사용자 : 401 Error.");
+    Object errorResponse = CustomErrorResponse.withDetails(
+      request.getRequestURI(), null, LocalDateTime.now(), List.of(e.getMessage()));
+    response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
   }
 }
