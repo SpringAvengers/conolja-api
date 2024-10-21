@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-import site.javaghost.conolja.common.exception.exceptions.JwtAuthenticationException;
+import site.javaghost.conolja.common.exception.JwtAuthenticationException;
 
 import java.io.IOException;
 
@@ -28,7 +28,7 @@ public class JwtValidationFilter extends OncePerRequestFilter {
 
     final String authHeader = request.getHeader(jwtProperties.header());
     // Authorization 헤더가 없는 경우 (ex. 로그인 요청)
-    if(!containsAuthHeader(authHeader)){
+    if (!containsAuthHeader(authHeader)) {
       filterChain.doFilter(request, response);
       return;
     }
