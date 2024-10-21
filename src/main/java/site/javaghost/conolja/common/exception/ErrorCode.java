@@ -6,6 +6,9 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum ErrorCode {
+
+  BAD_REQUEST(400, "잘못된 요청입니다."),
+
   JWT_INVALID_TOKEN(401, "유효하지 않은 토큰입니다."),
   JWT_TOKEN_EXPIRED(401, "만료된 토큰입니다."),
   JWT_INVALID_AUTHORIZATION_HEADER(401, "헤더 정보가 유효하지 않습니다."),
@@ -14,9 +17,9 @@ public enum ErrorCode {
 
   INVALID_PASSWORD(401, "비밀번호가 일치하지 않습니다."),
   INVALID_USERNAME(401, "유저네임이 일치하지 않습니다."),
+  DUPLICATED_ACCOUNT(401, "이미 존재하는 계정입니다."),
 
-  INTERNAL_SERVER_ERROR(500, "서버 내부 에러입니다.")
-  ;
+  INTERNAL_SERVER_ERROR(500, "서버 내부 에러입니다.");
 
   private final int status;
   private final String message;
