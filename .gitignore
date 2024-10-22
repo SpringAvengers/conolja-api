@@ -36,7 +36,6 @@ out/
 ### VS Code ###
 .vscode/
 
-### local ###
 application-local.yml
-application-test.yml
+.env
 docker-compose.yml
