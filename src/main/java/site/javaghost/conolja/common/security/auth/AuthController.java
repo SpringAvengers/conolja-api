@@ -1,8 +1,8 @@
 package site.javaghost.conolja.common.security.auth;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import site.javaghost.conolja.common.annotation.JwtToken;
 import site.javaghost.conolja.common.response.SimpleResponse;
 import site.javaghost.conolja.common.security.jwt.JwtProperties;
 import site.javaghost.conolja.common.security.jwt.JwtTokenDto;
@@ -50,9 +51,7 @@ public class AuthController {
 
   @PostMapping("/re-issue")
   @Operation(summary = "토큰 재발급", description = "리프래시 토큰을 통해 액세스 토큰을 재발급 합니다.")
-  public ResponseEntity<JwtTokenDto> reIssue(HttpServletRequest request) {
-    String headerValue = request.getHeader(props.header());
-    String token = jwtTokenUtil.parseToken(headerValue);
+  public ResponseEntity<JwtTokenDto> reIssue(@Parameter(hidden = true) @JwtToken String token) {
     return ResponseEntity.ok(jwtTokenUtil.reIssueToken(token));
   }
 }
