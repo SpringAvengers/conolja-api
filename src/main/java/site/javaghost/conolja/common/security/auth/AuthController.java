@@ -13,13 +13,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import site.javaghost.conolja.common.response.SimpleResponse;
 import site.javaghost.conolja.common.security.jwt.JwtProperties;
 import site.javaghost.conolja.common.security.jwt.JwtTokenDto;
 import site.javaghost.conolja.common.security.jwt.JwtTokenUtil;
 import site.javaghost.conolja.common.security.jwt.LoginRequest;
 import site.javaghost.conolja.domains.account.presentation.dto.AccountCreateRequest;
-
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,10 +32,10 @@ public class AuthController {
 
   @PostMapping("/signup")
   @Operation(summary = "회원가입", description = "회원가입을 합니다.")
-  public ResponseEntity<Map<String, String>> signup(
+  public ResponseEntity<SimpleResponse> signup(
     @Valid @RequestBody AccountCreateRequest request) {
     authService.signup(request.toCommand());
-    return ResponseEntity.ok(Map.of("message", "회원가입 성공"));
+    return ResponseEntity.ok(SimpleResponse.of("회원가입 성공"));
   }
 
   @PostMapping("/login")
