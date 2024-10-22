@@ -5,7 +5,7 @@ spring:
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://postgres:5432/conolja-dev
+    url: jdbc:postgresql://db.conolja.site:5432/conolja-dev
     username: conolja
     password: conolja123!@#
 
@@ -24,3 +24,4 @@ spring:
 springdoc:
   servers:
     - "https://api.conolja.site"
+    - "http://localhost:8080"
