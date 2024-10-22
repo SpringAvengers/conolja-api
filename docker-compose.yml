@@ -1,0 +1,79 @@
+services:
+  backend:
+    image: jhungminwoo/conolja:0.1.3
+    container_name: backend
+    volumes:
+      - backend_v:/app
+    ports:
+      - 8080:8080  # Spring Boot가 사용하는 포트
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/conolja-dev
+      SPRING_DATASOURCE_USERNAME: conolja
+      SPRING_DATASOURCE_PASSWORD: conolja123!@#
+      SPRING_PROFILES_ACTIVE: dev
+      TZ: Asia/Seoul  # 타임존 설정
+    depends_on:
+      - postgres
+    networks:
+      - conolja-network
+    restart: on-failure
+  
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_DB: conolja-dev
+      POSTGRES_USER: conolja
+      POSTGRES_PASSWORD: conolja123!@#
+    volumes:
+      - /home/ubuntu/db/data:/var/lib/postgresql/data
+      - /home/ubuntu/db/initdb.d:/docker-entrypoint-initdb.d
+    ports:
+      - 5432:5432  # PostgreSQL 기본 포트
+    networks:
+      - conolja-network
+  
+  jenkins:
+    build:
+      context: /home/ubuntu/dockerfiles/jenkins
+      args:
+        HOST_USER_ID: 1001 # 호스트 유저 'ubuntu' 의 UID
+        HOST_DOCKER_GROUP_ID: 988 # 호스트 그룹 'docker' 의 GID
+      dockerfile: Dockerfile
+    image: jhungminwoo/jenkins:latest  # 빌드된 jenkins 이미지 이름 지정하기
+    container_name: jenkins
+    ports:
+      - "9090:8080"  # 호스트의 9090 포트를 컨테이너의 8080 포트에 매핑
+    environment:
+      JAVA_OPTS: "-Djenkins.install.runSetupWizard=false"
+      # CASC_JENKINS_CONFIG: "/var/jenkins_home/casc_configs/jenkins.yaml"
+      # ADMIN_PASSWORD: "1234" 
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/ubuntu/jenkins:/var/jenkins_home
+    networks:
+      - conolja-network
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:latest
+    container_name: webserver
+    restart: unless-stopped
+    volumes:
+      - /home/ubuntu/nginx:/etc/nginx
+      - /home/ubuntu/ssl/certbot/conf:/etc/letsencrypt
+      - /home/ubuntu/ssl/certbot/www:/var/www/certbot
+    networks:
+      - conolja-network
+    ports:
+      - "80:80"
+      - "443:443"
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+
+networks:
+  conolja-network:
+    name: conolja-network
+    driver: bridge
+
+volumes:
+  backend_v: 
