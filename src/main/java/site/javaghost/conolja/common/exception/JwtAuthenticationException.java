@@ -12,6 +12,7 @@ import java.util.List;
 import static site.javaghost.conolja.common.exception.ErrorCode.INVALID_PASSWORD;
 import static site.javaghost.conolja.common.exception.ErrorCode.INVALID_USERNAME;
 import static site.javaghost.conolja.common.exception.ErrorCode.JWT_INVALID_AUTHORIZATION_HEADER;
+import static site.javaghost.conolja.common.exception.ErrorCode.JWT_INVALID_SECRET_KEY;
 import static site.javaghost.conolja.common.exception.ErrorCode.JWT_INVALID_TOKEN;
 import static site.javaghost.conolja.common.exception.ErrorCode.JWT_INVALID_TYPE;
 import static site.javaghost.conolja.common.exception.ErrorCode.JWT_TOKEN_EXPIRED;
@@ -75,6 +76,14 @@ public class JwtAuthenticationException extends AuthenticationException {
       .message(JWT_INVALID_TYPE.getMessage() + "전달 된 값: " + headerValue)
       .timestamp(LocalDateTime.now())
       .errorCode(JWT_INVALID_TYPE)
+      .build();
+  }
+
+  public static JwtAuthenticationException invalidSecretKey() {
+    return JwtAuthenticationException.builder()
+      .message(JWT_INVALID_SECRET_KEY.getMessage())
+      .timestamp(LocalDateTime.now())
+      .errorCode(JWT_INVALID_SECRET_KEY)
       .build();
   }
 }

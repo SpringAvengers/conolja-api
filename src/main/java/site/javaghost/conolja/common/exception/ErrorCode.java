@@ -15,6 +15,7 @@ public enum ErrorCode {
   JWT_INVALID_AUTHORIZATION_HEADER(401, "헤더 정보가 유효하지 않습니다."),
   JWT_INVALID_ISSUER(401, "발급자 정보가 유효하지 않습니다."),
   JWT_INVALID_TYPE(401, "토큰 타입이 유효하지 않습니다."),
+  JWT_INVALID_SECRET_KEY(401, "시크릿키가 유효하지 않습니다"),
 
   INVALID_PASSWORD(401, "비밀번호가 일치하지 않습니다."),
   INVALID_USERNAME(401, "유저네임이 일치하지 않습니다."),
