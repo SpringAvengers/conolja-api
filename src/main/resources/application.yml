@@ -4,7 +4,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update  # 테이블이 없을 경우 생성, 테이블이 있을 경우 변경사항을 반영
+      ddl-auto: validate  # 테이블이 없을 경우 에러 발생, 테이블이 있을 경우 변경사항을 반영하지 않음
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -27,7 +27,7 @@ springdoc:
   show-login-endpoint: true
 
 jwt:
-  secret: IDyR2qkVrZUbbkEobzqRU5CGMT8egOTBMgNejesrLKdUGflqxraX/QM3gKj+tly6JGSRkcmH8CPR+j/VfsZB2w==
+  secret: ${JWT_SECRET}
   expiration: 1800000 # 30분
   header: Authorization
   prefix: Bearer

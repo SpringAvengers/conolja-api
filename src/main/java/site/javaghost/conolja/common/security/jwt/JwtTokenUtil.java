@@ -96,8 +96,12 @@ public class JwtTokenUtil {
   }
 
   private SecretKeySpec getPrivateKey(String secretKey) {
-    byte[] keyBytes = Base64.getDecoder().decode(secretKey);
-    return new SecretKeySpec(keyBytes, SignatureAlgorithm.HS512.getJcaName());
+    try {
+      byte[] keyBytes = Base64.getDecoder().decode(secretKey);
+      return new SecretKeySpec(keyBytes, SignatureAlgorithm.HS512.getJcaName());
+    } catch (IllegalArgumentException e) {
+      throw JwtAuthenticationException.invalidSecretKey();
+    }
   }
 
   public boolean hasExpired(String token) {
